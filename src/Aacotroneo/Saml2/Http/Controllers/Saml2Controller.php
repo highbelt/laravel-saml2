@@ -121,7 +121,10 @@ class Saml2Controller extends Controller
      */
     public function login()
     {
-        $this->saml2Auth->login(Config::get('saml2_settings.loginRoute'));
+        // check if there is a previously intended URL in current session
+        // fallback to loginRoute defined in SAML2 config file
+        $relayState = Session::pull('url.intended', Config::get('saml2_settings.loginRoute'));
+        $this->saml2Auth->login($relayState);
     }
 
 }
