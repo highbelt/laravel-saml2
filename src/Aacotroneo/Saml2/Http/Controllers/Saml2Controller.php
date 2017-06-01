@@ -108,10 +108,12 @@ class Saml2Controller extends Controller
      */
     public function logout()
     {
+				$request = app('request');
         $returnTo = $request->query('returnTo');
         $sessionIndex = $request->query('sessionIndex');
         $nameId = $request->query('nameId');
-        $this->saml2Auth->logout($returnTo, $nameId, $sessionIndex); //will actually end up in the sls endpoint
+        $parameters = $request->query('parameters');
+        $this->saml2Auth->logout($returnTo, $nameId, $sessionIndex, $parameters); //will actually end up in the sls endpoint
         //does not return
     }
 
