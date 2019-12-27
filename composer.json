@@ -1,9 +1,10 @@
 {
-    "name": "highbelt/laravel-saml2",
-    "description": "A Laravel package for Saml2 integration as a SP (service provider) for multiple IDPs. Forked from nirajp/laravel-saml2.",
+    "name": "nirajp/laravel-saml2",
+    "description": "A Laravel package for Saml2 integration as a SP (service provider) for multiple IDPs. Forked from aacotroneo/laravel-saml2.",
     "keywords": ["laravel","saml", "saml2", "onelogin"],
-    "homepage": "https://github.com/highbelt/laravel-saml2",
+    "homepage": "https://github.com/nirajp/laravel-saml2",
     "license": "MIT",
+    "version": "1.0.0",
     "authors": [
         {
             "name": "aacotroneo",
@@ -12,16 +13,13 @@
         {
             "name": "Niraj Patkar",
             "email": "niraj@alphonso.in"
-        },
-        {
-            "name": "highbelt",
-            "email": "highbelt@gmail.com"
         }
     ],
     "require": {
         "php": ">=5.4.0",
-        "illuminate/support": "4.2.*",
-        "onelogin/php-saml": "~2.10"
+        "ext-openssl": "*",
+        "illuminate/support": ">=5.0.0",
+        "onelogin/php-saml": "^3.0.0"
     },
     "require-dev": {
         "mockery/mockery": "0.9.*",
@@ -30,6 +28,16 @@
     "autoload": {
         "psr-0": {
             "Aacotroneo\\Saml2\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Aacotroneo\\Saml2\\Saml2ServiceProvider"
+            ],
+            "aliases": {
+                "Saml2": "Aacotroneo\\Saml2\\Facades\\Saml2Auth"
+            }
         }
     },
     "minimum-stability": "stable"
