@@ -1,10 +1,10 @@
 <?php
 
-foreach (config('saml2_settings.idpNames') as $key => $value) {
+foreach (Config::get('saml2_settings.idpNames') as $key => $value) {
    
     Route::group([
         'prefix' => $value,
-        'middleware' => config('saml2_settings.routesMiddleware'),
+        'middleware' => Config::get('saml2_settings.routesMiddleware'),
     ], function () use ($value) {
         
         Route::get('/logout', array(

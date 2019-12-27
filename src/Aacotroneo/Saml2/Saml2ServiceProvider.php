@@ -2,6 +2,7 @@
 namespace Aacotroneo\Saml2;
 
 use OneLogin_Saml2_Auth;
+use Config;
 use URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,14 +23,9 @@ class Saml2ServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if(config('saml2_settings.useRoutes', false) == true ){
+        if(Config::get('saml2_settings.useRoutes', false) == true ){
             include __DIR__ . '/../../routes.php';
         }
-
-        $this->publishes([
-            __DIR__.'/../../config/saml2_settings.php' => config_path('saml2_settings.php'),
-            __DIR__.'/../../config/test_idp_settings.php' => config_path('saml.test_idp_settings.php'),
-        ]);
     }
 
     /**

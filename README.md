@@ -1,6 +1,6 @@
 Forked from aacotroneo/laravel-saml2. Idea is to enhance the existing code to support configuration for multiple IDPs.
 
-## Laravel 5 - Saml2
+## Laravel 4 - Saml2
 
 [![Build Status](https://travis-ci.org/nirajp/laravel-saml2.svg)](https://travis-ci.org/nirajp/laravel-saml2)
 
@@ -11,7 +11,7 @@ The aim of this library is to be as simple as possible. We won't mess with Larav
 
 ## Installation - Composer
 
-To install Saml2 as a Composer package to be used with Laravel 5, simply add this to your composer.json:
+To install Saml2 as a Composer package to be used with Laravel 4, simply add this to your composer.json:
 
 ```json
 "nirajp/laravel-saml2": "*"
@@ -31,7 +31,7 @@ To install Saml2 as a Composer package to be used with Laravel 5, simply add thi
 ]
 ```
 
-Then publish the config files with `php artisan vendor:publish`. This will add the files `app/config/saml2_settings.php` & `app/config/saml2/test_idp_settings.php`. 
+Then copy config files `laravel-saml2/src/config/saml2_settings.php` & `laravel-saml2/src/config/test_idp_settings.php` to `app/config` & `app/config/saml2` folders respectively.
 
 The test_idp_settings.php config is handled almost directly by  [OneLogin](https://github.com/onelogin/php-saml) so you may get further references there, but will cover here what's really necessary. There are some other config about routes you may want to check, they are pretty strightforward.
 
@@ -75,7 +75,7 @@ When you want your user to login, just call `Saml2Auth::login()` or redirect to 
 			}
 			else
 			{
-        			 return Saml2::login(URL::full());
+            			 return Saml2::login(URL::full());
                 		 //return redirect()->guest('auth/login');
 			}
 		}
@@ -88,9 +88,10 @@ The Saml2::login will redirect the user to the IDP and will came back to an endp
 
 ```php
 
- Event::listen('Aacotroneo\Saml2\Events\Saml2LoginEvent', function (Saml2LoginEvent $event) {
+ Event::listen('saml2.login', function ($data)) {
 
-            $user = $event->getSaml2User();
+            $idp = $data['idp'];
+            $user = $data['user'];
             $userData = [
                 'id' => $user->getUserId(),
                 'attributes' => $user->getAttributes(),
@@ -114,10 +115,13 @@ For case 2 you will only receive the event. Both cases 1 and 2 receive the same 
 Note that for case 2, you may have to manually save your session to make the logout stick (as the session is saved by middleware, but the OneLogin library will redirect back to your IDP before that happens)
 
 ```php
-        Event::listen('Aacotroneo\Saml2\Events\Saml2LogoutEvent', function ($event) {
+        Event::listen('saml2.logout', function ($data)) {
+
+            $idp = $data['idp'];
             Auth::logout();
             Session::save();
         });
+
 ```
 
 

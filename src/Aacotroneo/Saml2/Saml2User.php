@@ -2,6 +2,8 @@
 
 namespace Aacotroneo\Saml2;
 
+use Input;
+
 use OneLogin_Saml2_Auth;
 
 /**
@@ -45,14 +47,14 @@ class Saml2User
      */
     function getRawSamlAssertion()
     {
-        return app('request')->input('SAMLResponse'); //just this request
+        return Input::get('SAMLResponse'); //just this request
     }
 
     function getIntendedUrl()
     {
-        $relayState = app('request')->input('RelayState'); //just this request
+        $relayState = Input::get('RelayState'); //just this request
 
-        $url = app('Illuminate\Contracts\Routing\UrlGenerator');
+        $url = app('Illuminate\Routing\UrlGenerator');
 
         if ($relayState && $url->full() != $relayState) {
 
