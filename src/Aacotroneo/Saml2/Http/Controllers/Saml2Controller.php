@@ -2,24 +2,12 @@
 
 namespace Aacotroneo\Saml2\Http\Controllers;
 
+use Aacotroneo\Saml2\Events\Saml2LoginEvent;
 use Aacotroneo\Saml2\Saml2Auth;
-
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
-<<<<<<< HEAD
-
-use Config;
-use Event;
-use Log;
-use Redirect;
-use Response;
-use Session;
-=======
 use OneLogin\Saml2\Auth as OneLogin_Saml2_Auth;
->>>>>>> upstream/master
 use URL;
-
-use OneLogin_Saml2_Auth;
 
 class Saml2Controller extends Controller
 {
@@ -40,7 +28,7 @@ class Saml2Controller extends Controller
             $this->idp = 'test';
         }
 
-        $config = Config::get('saml2/'.$this->idp.'_idp_settings');
+        $config = config('saml2.'.$this->idp.'_idp_settings');
 
         if (empty($config['sp']['entityId'])) {
             $config['sp']['entityId'] = URL::route($this->idp.'_metadata');
@@ -76,7 +64,7 @@ class Saml2Controller extends Controller
 
         $metadata = $this->saml2Auth->getMetadata();
 
-        return Response::make($metadata, 200, ['Content-Type' => 'text/xml']);
+        return response($metadata, 200, ['Content-Type' => 'text/xml']);
     }
 
     /**
@@ -88,15 +76,6 @@ class Saml2Controller extends Controller
         $errors = $this->saml2Auth->acs();
 
         if (!empty($errors)) {
-<<<<<<< HEAD
-            Log::error('Saml2 error', $errors);
-            Session::flash('saml2_error', $errors);
-            return Redirect::to(Config::get('saml2_settings.errorRoute'));
-        }
-        $user = $this->saml2Auth->getSaml2User();
-
-        Event::fire('saml2.login', array(array('idp' => $this->idp, 'user' => $user)));
-=======
             logger()->error('Saml2 error_detail', ['error' => $this->saml2Auth->getLastErrorReason()]);
             session()->flash('saml2_error_detail', [$this->saml2Auth->getLastErrorReason()]);
 
@@ -107,15 +86,14 @@ class Saml2Controller extends Controller
         $user = $this->saml2Auth->getSaml2User();
 
         event(new Saml2LoginEvent($this->idp, $user, $this->saml2Auth));
->>>>>>> upstream/master
 
         $redirectUrl = $user->getIntendedUrl();
 
         if ($redirectUrl !== null) {
-            return Redirect::to($redirectUrl);
+            return redirect($redirectUrl);
         } else {
 
-            return Redirect::to(Config::get('saml2_settings.loginRoute'));
+            return redirect(config('saml2_settings.loginRoute'));
         }
     }
 
@@ -126,27 +104,25 @@ class Saml2Controller extends Controller
      */
     public function sls()
     {
-        $errors = $this->saml2Auth->sls($this->idp, Config::get('saml2_settings.retrieveParametersFromServer'));
+        $errors = $this->saml2Auth->sls($this->idp, config('saml2_settings.retrieveParametersFromServer'));
         if (!empty($errors)) {
-            Log::error('Saml2 error', $errors);
-            Session::flash('saml2_error', $errors);
+            logger()->error('Saml2 error', $errors);
+            session()->flash('saml2_error', $errors);
             throw new \Exception("Could not log out");
         }
 
-        return Redirect::to(Config::get('saml2_settings.logoutRoute')); //may be set a configurable default
+        return redirect(config('saml2_settings.logoutRoute')); //may be set a configurable default
     }
 
     /**
      * This initiates a logout request across all the SSO infrastructure.
      */
-    public function logout()
+    public function logout(Request $request)
     {
-        $request = app('request');
         $returnTo = $request->query('returnTo');
         $sessionIndex = $request->query('sessionIndex');
         $nameId = $request->query('nameId');
-        $parameters = $request->query('parameters');
-        $this->saml2Auth->logout($returnTo, $nameId, $sessionIndex, $parameters); //will actually end up in the sls endpoint
+        $this->saml2Auth->logout($returnTo, $nameId, $sessionIndex); //will actually end up in the sls endpoint
         //does not return
     }
 
@@ -156,10 +132,7 @@ class Saml2Controller extends Controller
      */
     public function login()
     {
-        // check if there is a previously intended URL in current session
-        // fallback to loginRoute defined in SAML2 config file
-        $relayState = Session::pull('url.intended', Config::get('saml2_settings.loginRoute'));
-        $this->saml2Auth->login($relayState);
+        $this->saml2Auth->login(config('saml2_settings.loginRoute'));
     }
 
     protected function extractPkeyFromFile($path) {
